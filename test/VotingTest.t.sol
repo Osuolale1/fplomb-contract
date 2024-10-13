@@ -237,6 +237,64 @@ contract VotingTest is Test {
         voting.vote(1, "Charlie");
     }
 
+    function testGetAllElections() public {
+        // Create dummy candidates for election 1
+        Voting.Candidate[] memory candidates = new Voting.Candidate[](2);
+        candidates[0] = Voting.Candidate("Alice", "QmHashAlice");
+        candidates[1] = Voting.Candidate("Bob", "QmHashBob");
+
+        // Create dummy candidates for election 2
+        Voting.Candidate[] memory candidates2 = new Voting.Candidate[](2);
+        candidates2[0] = Voting.Candidate("Charlie", "QmHashCharlie");
+        candidates2[1] = Voting.Candidate("Dave", "QmHashDave");
+
+        // Create two elections
+        voting.createElection("Presidential Election", "Country A", 60, 120, candidates);
+        voting.createElection("Parliamentary Election", "Country B", 120, 180, candidates2);
+
+        // Call getAllElections and validate results
+        (
+            string[] memory pollTitles,
+            string[] memory countries,
+            uint256[] memory startTimes,
+            uint256[] memory endTimes,
+            Voting.Candidate[][] memory allCandidates,
+            uint256[][] memory allVotes
+        ) = voting.getAllElections();
+
+        // Validate the number of elections
+        assertEq(pollTitles.length, 2);
+        assertEq(countries.length, 2);
+        assertEq(startTimes.length, 2);
+        assertEq(endTimes.length, 2);
+        assertEq(allCandidates.length, 2);
+        assertEq(allVotes.length, 2);
+
+        // Validate election 1
+        assertEq(pollTitles[0], "Presidential Election");
+        assertEq(countries[0], "Country A");
+        assertEq(startTimes[0], 60);
+        assertEq(endTimes[0], 120);
+
+        assertEq(allCandidates[0].length, 2);
+        assertEq(allCandidates[0][0].name, "Alice");
+        assertEq(allCandidates[0][0].ipfsHash, "QmHashAlice");
+        assertEq(allCandidates[0][1].name, "Bob");
+        assertEq(allCandidates[0][1].ipfsHash, "QmHashBob");
+
+        // Validate election 2
+        assertEq(pollTitles[1], "Parliamentary Election");
+        assertEq(countries[1], "Country B");
+        assertEq(startTimes[1], 120);
+        assertEq(endTimes[1], 180);
+
+        assertEq(allCandidates[1].length, 2);
+        assertEq(allCandidates[1][0].name, "Charlie");
+        assertEq(allCandidates[1][0].ipfsHash, "QmHashCharlie");
+        assertEq(allCandidates[1][1].name, "Dave");
+        assertEq(allCandidates[1][1].ipfsHash, "QmHashDave");
+    }
+
     // function testDelegateVote() public {
 
     //     // Create election

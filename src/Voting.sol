@@ -173,6 +173,53 @@ contract Voting {
         return (election.pollTitle, election.country, election.startTime, election.endTime, candidates, votes);
     }
 
+    function getAllElections()
+        public
+        view
+        returns (
+            string[] memory pollTitles,
+            string[] memory countries,
+            uint256[] memory startTimes,
+            uint256[] memory endTimes,
+            Candidate[][] memory allCandidates,
+            uint256[][] memory allVotes
+        )
+    {
+        // Initialize arrays to store the election details
+        pollTitles = new string[](electionCount);
+        countries = new string[](electionCount);
+        startTimes = new uint256[](electionCount);
+        endTimes = new uint256[](electionCount);
+        allCandidates = new Candidate[][](electionCount);
+        allVotes = new uint256[][](electionCount);
+
+        // Loop through each election and extract the data
+        for (uint256 electionId = 1; electionId <= electionCount; electionId++) {
+            Election storage election = elections[electionId];
+
+            // Populate the general election details
+            pollTitles[electionId - 1] = election.pollTitle;
+            countries[electionId - 1] = election.country;
+            startTimes[electionId - 1] = election.startTime;
+            endTimes[electionId - 1] = election.endTime;
+
+            // Prepare candidates and corresponding votes arrays
+            Candidate[] memory candidates = new Candidate[](election.candidates.length);
+            uint256[] memory votes = new uint256[](election.candidates.length);
+
+            for (uint256 i = 0; i < election.candidates.length; i++) {
+                candidates[i] = election.candidates[i];
+                votes[i] = election.votes[election.candidates[i].name];
+            }
+
+            // Store candidates and votes for this election
+            allCandidates[electionId - 1] = candidates;
+            allVotes[electionId - 1] = votes;
+        }
+
+        return (pollTitles, countries, startTimes, endTimes, allCandidates, allVotes);
+    }
+
     // function getCandidate(uint256 electionId, uint256 candidateIndex)
     //     public
     //     view
@@ -251,8 +298,6 @@ contract Voting {
         }
         return electionIds;
     }
-
-
 
     // function delegate(uint256 electionId, address delegatee) public {
     //     require(elections[electionId].exists, "Election does not exist");
